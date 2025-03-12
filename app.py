@@ -48,23 +48,24 @@ def criar_pdf():
     conteudo.append(titulo)
     conteudo.append(Spacer(1, 12))
 
+    # Questões organizadas por tema
     questoes_por_tema = {
         "Matemática": {
-            "imagem": "imagens/matematica.jpg",
+            "imagem": "static/imagens/matematica.jpg",  # Caminho corrigido
             "questoes": [
                 "1. Qual é a fórmula para calcular a área de um círculo?",
                 "2. Explique o Teorema de Pitágoras."
             ]
         },
         "História": {
-            "imagem": "imagens/historia.jpg",
+            "imagem": "static/imagens/historia.jpg",  # Caminho corrigido
             "questoes": [
                 "1. Quais foram as causas da Revolução Francesa?",
                 "2. Descreva o período da Revolução Industrial."
             ]
         },
         "Biologia": {
-            "imagem": "imagens/biologia.jpg",
+            "imagem": "static/imagens/biologia.jpg",  # Caminho corrigido
             "questoes": [
                 "1. O que é fotossíntese e qual a sua importância?",
                 "2. Explique a estrutura do DNA."
@@ -72,22 +73,33 @@ def criar_pdf():
         }
     }
 
+    # Adiciona as questões ao PDF, organizadas por tema
     for tema, dados in questoes_por_tema.items():
         tema_formatado = Paragraph(f"<b>Tema: {tema}</b>", styles['Heading2'])
         conteudo.append(tema_formatado)
         conteudo.append(Spacer(1, 12))
 
-        imagem = Image(dados["imagem"], width=4*inch, height=3*inch)
-        conteudo.append(imagem)
-        conteudo.append(Spacer(1, 12))
+        try:
+            # Tenta carregar a imagem
+            imagem = Image(dados["imagem"], width=4*inch, height=3*inch)
+            conteudo.append(imagem)
+            conteudo.append(Spacer(1, 12))
+        except Exception as e:
+            # Se a imagem não for encontrada, exibe uma mensagem de erro
+            print(f"Erro ao carregar a imagem: {e}")
+            conteudo.append(Paragraph("<i>Imagem não disponível</i>", styles['Italic']))
+            conteudo.append(Spacer(1, 12))
 
+        # Adiciona as questões do tema
         for questao in dados["questoes"]:
             questao_formatada = Paragraph(questao, styles['BodyText'])
             conteudo.append(questao_formatada)
             conteudo.append(Spacer(1, 12))
 
+        # Adiciona uma quebra de página entre os temas
         conteudo.append(PageBreak())
 
+    # Gera o PDF
     pdf.build(conteudo)
 
 # Função para criar o DOCX
@@ -95,6 +107,7 @@ def criar_docx():
     doc = Document()
     doc.add_heading('Ebook de Questões para Estudo', 0)
 
+    # Questões organizadas por tema
     questoes_por_tema = {
         "Matemática": [
             "1. Qual é a fórmula para calcular a área de um círculo?",
@@ -110,12 +123,14 @@ def criar_docx():
         ]
     }
 
+    # Adiciona as questões ao DOCX
     for tema, questoes in questoes_por_tema.items():
         doc.add_heading(f'Tema: {tema}', level=1)
         for questao in questoes:
             doc.add_paragraph(questao)
         doc.add_page_break()
 
+    # Salva o DOCX
     doc.save('prova.docx')
 
 # Função para criar o EPUB
@@ -126,7 +141,7 @@ def criar_epub():
     livro.set_title('Ebook de Questões para Estudo')
     livro.set_language('pt-BR')
 
-    # Adiciona capítulos
+    # Questões organizadas por tema
     questoes_por_tema = {
         "Matemática": [
             "1. Qual é a fórmula para calcular a área de um círculo?",
@@ -142,6 +157,7 @@ def criar_epub():
         ]
     }
 
+    # Adiciona capítulos ao EPUB
     for tema, questoes in questoes_por_tema.items():
         capitulo = epub.EpubHtml(title=tema, file_name=f'{tema}.xhtml', lang='pt-BR')
         capitulo.content = f"<h1>{tema}</h1><ul>"
