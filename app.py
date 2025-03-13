@@ -12,6 +12,19 @@ from reportlab.lib.units import inch
 from docx import Document
 from ebooklib import epub
 from transformers import pipeline
+import torch
+print(torch.__version__)  # Deve mostrar a versão instalada, ex.: 2.4.0
+print(torch.cuda.is_available())  # True se CUDA estiver configurado, False se for só CPU
+
+def generate_question(prompt, num_questions=10):
+    gerador = pipeline('text-generation', model='EleutherAI/gpt-neo-125M')
+    questions = []
+    for i in range(num_questions):
+        input_prompt = f"Crie a questão {i+1} sobre {prompt}. Formato: '{i+1}. [pergunta]'"
+        generated = gerador(input_prompt, max_length=100, num_return_sequences=1)[0]['generated_text']
+        question = generated.split(f"{i+1}. ")[-1].strip()
+        questions.append({'question': question})
+    return questions
 
 # === Initial Setup ===
 nltk.download('punkt')
