@@ -24,9 +24,17 @@ def buscar_questoes(tema):
     response = requests.get(url)
     return response.json()['results'] if response.status_code == 200 else []
 
-def generate_question(prompt):
+def generate_question(prompt, num_questions=10):
     gerador = pipeline('text-generation', model='EleutherAI/gpt-neo-1.3B')
-    return gerador(prompt, max_length=50)[0]['generated_text']
+    questions = []
+    for i in range(num_questions):
+        # Ajusta o prompt para gerar perguntas numeradas
+        input_prompt = f"Crie a questão {i+1} sobre {prompt}. Formato: '{i+1}. [pergunta]'"
+        generated = gerador(input_prompt, max_length=100, num_return_sequences=1)[0]['generated_text']
+        # Extrai a pergunta gerada (assumindo que o modelo segue o formato)
+        question = generated.split(f"{i+1}. ")[-1].strip()
+        questions.append({'question': question})
+    return questions
 
 # === PDF Creation Functions ===
 def criar_pdf(caminho_imagem=None, questoes=None):
@@ -34,11 +42,9 @@ def criar_pdf(caminho_imagem=None, questoes=None):
     styles = getSampleStyleSheet()
     conteudo = []
 
-    # Title
     conteudo.append(Paragraph("Ebook de Questões para Estudo", styles['Title']))
     conteudo.append(Spacer(1, 12))
 
-    # Add uploaded image if provided
     if caminho_imagem:
         try:
             imagem = Image(caminho_imagem, width=4*inch, height=3*inch)
@@ -49,56 +55,11 @@ def criar_pdf(caminho_imagem=None, questoes=None):
             conteudo.append(Paragraph("<i>Imagem não disponível</i>", styles['Italic']))
             conteudo.append(Spacer(1, 12))
 
-    # Add questions if provided
     if questoes:
         for i, questao in enumerate(questoes, start=1):
             questao_formatada = Paragraph(f"{i}. {questao['question']}", styles['BodyText'])
             conteudo.append(questao_formatada)
             conteudo.append(Spacer(1, 12))
-    else:
-        # Default themed questions
-        questoes_por_tema = {
-            "Matemática": {
-                "imagem": "static/imagens/matematica.jpg",
-                "questoes": [
-                    "1. Qual é a fórmula para calcular a área de um círculo?",
-                    "2. Explique o Teorema de Pitágoras."
-                ]
-            },
-            "História": {
-                "imagem": "static/imagens/historia.jpg",
-                "questoes": [
-                    "1. Quais foram as causas da Revolução Francesa?",
-                    "2. Descreva o período da Revolução Industrial."
-                ]
-            },
-            "Biologia": {
-                "imagem": "static/imagens/biologia.jpg",
-                "questoes": [
-                    "1. O que é fotossíntese e qual a sua importância?",
-                    "2. Explique a estrutura do DNA."
-                ]
-            }
-        }
-
-        for tema, dados in questoes_por_tema.items():
-            conteudo.append(Paragraph(f"<b>Tema: {tema}</b>", styles['Heading2']))
-            conteudo.append(Spacer(1, 12))
-            
-            try:
-                imagem = Image(dados["imagem"], width=4*inch, height=3*inch)
-                conteudo.append(imagem)
-                conteudo.append(Spacer(1, 12))
-            except Exception as e:
-                print(f"Erro ao carregar a imagem: {e}")
-                conteudo.append(Paragraph("<i>Imagem não disponível</i>", styles['Italic']))
-                conteudo.append(Spacer(1, 12))
-
-            for questao in dados["questoes"]:
-                conteudo.append(Paragraph(questao, styles['BodyText']))
-                conteudo.append(Spacer(1, 12))
-            
-            conteudo.append(PageBreak())
 
     pdf.build(conteudo)
 
@@ -110,27 +71,6 @@ def criar_docx(caminho_imagem=None, questoes=None):
     if questoes:
         for i, questao in enumerate(questoes, start=1):
             doc.add_paragraph(f"{i}. {questao['question']}")
-    else:
-        questoes_por_tema = {
-            "Matemática": [
-                "1. Qual é a fórmula para calcular a área de um círculo?",
-                "2. Explique o Teorema de Pitágoras."
-            ],
-            "História": [
-                "1. Quais foram as causas da Revolução Francesa?",
-                "2. Descreva o período da Revolução Industrial."
-            ],
-            "Biologia": [
-                "1. O que é fotossíntese e qual a sua importância?",
-                "2. Explique a estrutura do DNA."
-            ]
-        }
-
-        for tema, questoes_list in questoes_por_tema.items():
-            doc.add_heading(f'Tema: {tema}', level=1)
-            for questao in questoes_list:
-                doc.add_paragraph(questao)
-            doc.add_page_break()
 
     doc.save('prova.docx')
 
@@ -148,31 +88,6 @@ def criar_epub(caminho_imagem=None, questoes=None):
         capitulo.content += "</ul>"
         livro.add_item(capitulo)
         livro.toc = (epub.Link('questoes.xhtml', 'Questões', 'questoes'),)
-    else:
-        questoes_por_tema = {
-            "Matemática": [
-                "1. Qual é a fórmula para calcular a área de um círculo?",
-                "2. Explique o Teorema de Pitágoras."
-            ],
-            "História": [
-                "1. Quais foram as causas da Revolução Francesa?",
-                "2. Descreva o período da Revolução Industrial."
-            ],
-            "Biologia": [
-                "1. O que é fotossíntese e qual a sua importância?",
-                "2. Explique a estrutura do DNA."
-            ]
-        }
-
-        for tema, questoes_list in questoes_por_tema.items():
-            capitulo = epub.EpubHtml(title=tema, file_name=f'{tema}.xhtml', lang='pt-BR')
-            capitulo.content = f"<h1>{tema}</h1><ul>"
-            for questao in questoes_list:
-                capitulo.content += f"<li>{questao}</li>"
-            capitulo.content += "</ul>"
-            livro.add_item(capitulo)
-
-        livro.toc = tuple(questoes_por_tema.keys())
 
     livro.add_item(epub.EpubNav())
     livro.add_item(epub.EpubNcx())
@@ -190,7 +105,7 @@ def escolher_formato():
 @app.route('/gerar_ebook', methods=['POST'])
 def gerar_ebook():
     formato = request.form.get('formato')
-    tema = request.form.get('tema')
+    prompt = request.form.get('prompt')  # Novo campo para o prompt do usuário
     imagem = request.files.get('imagem')
     
     caminho_imagem = None
@@ -198,7 +113,11 @@ def gerar_ebook():
         caminho_imagem = os.path.join(app.config['UPLOAD_FOLDER'], imagem.filename)
         imagem.save(caminho_imagem)
 
-    questoes = buscar_questoes(tema) if tema else None
+    # Se o usuário fornecer um prompt, gerar questões personalizadas
+    if prompt:
+        questoes = generate_question(prompt)
+    else:
+        questoes = buscar_questoes("default")  # Fallback para API ou questões padrão
 
     if formato == "pdf":
         criar_pdf(caminho_imagem, questoes)

@@ -61,3 +61,10 @@ p {
 .btn {
     margin-top: 20px;
 }
+.formato-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
+h1 {
+    color: #007bff;
+}
