@@ -11,11 +11,18 @@
 <body>
     <div class="container text-center mt-5">
         <h1 class="mb-4">Gerar Ebook de Questões</h1>
-        <p class="lead">Clique no botão abaixo para escolher o formato do ebook.</p>
-        <a href="/escolher_formato" class="btn btn-primary btn-lg">
-            <i class="fas fa-book"></i> Escolher Formato
-        </a>
+        <p class="lead">Digite as questões para gerar seu eBook:</p>
+        
+        <form action="/gerar_ebook" method="POST">
+            <div class="mb-3">
+                <textarea class="form-control" name="conteudo" rows="5" placeholder="Digite suas questões aqui..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-book"></i> Gerar eBook
+            </button>
+        </form>
     </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>

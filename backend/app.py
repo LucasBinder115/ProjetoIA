@@ -1,5 +1,5 @@
 # === Imports ===
-from flask import Flask, render_template, send_file, request, jsonify  # Adicionei jsonify
+from flask import Flask, render_template, send_file, request, jsonify
 import os
 import requests
 import nltk
@@ -21,7 +21,7 @@ from celery.signals import after_setup_logger
 
 # === Initial Setup ===
 nltk.download('punkt')
-app = Flask(__name__, template_folder='../templates', static_folder='../static')  # Caminho relativo mantido
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['UPLOAD_FOLDER'] = 'static/imagens'  # Folder for uploaded images
 
 # Configure o Celery
@@ -44,8 +44,8 @@ def setup_loggers(logger, *args, **kwargs):
 # === Helper Functions ===
 @lru_cache(maxsize=100)
 def gerar_html(questoes):
-    # Lógica de geração de HTML
-    pass  # Placeholder, já que não há implementação completa
+    # Lógica de geração de HTML (placeholder)
+    pass
 
 def buscar_questoes(tema):
     url = f"https://opentdb.com/api.php?amount=10&category=18&type=multiple"
@@ -53,30 +53,23 @@ def buscar_questoes(tema):
     return response.json()['results'] if response.status_code == 200 else []
 
 def generate_question(prompt, num_questions=10):
-    gerador = pipeline('text-generation', model='EleutherAI/gpt-neo-1.3B')  # Mantive a versão 1.3B
+    gerador = pipeline('text-generation', model='EleutherAI/gpt-neo-1.3B')
     questions = []
     for i in range(num_questions):
-        # Ajusta o prompt para gerar perguntas numeradas
         input_prompt = f"Crie a questão {i+1} sobre {prompt}. Formato: '{i+1}. [pergunta]'"
         generated = gerador(input_prompt, max_length=100, num_return_sequences=1)[0]['generated_text']
-        # Extrai a pergunta gerada (assumindo que o modelo segue o formato)
         question = generated.split(f"{i+1}. ")[-1].strip()
         questions.append({'question': question})
     return questions
 
-def gerar_pdf_async(prompt, formato, caminho_imagem=None):
-    cache_key = f"pdf:{prompt}"
-    cached = redis.get(cache_key)
-    if cached:
-        return cached.decode()
-    # ... gera e salva no cache (incompleto no original, deixei como está)
-
-# === PDF Creation Functions ===
+# === File Creation Functions ===
 def criar_pdf(caminho_imagem=None, questoes=None):
     # 1. Criar HTML dinâmico
     html_content = """
+    <!DOCTYPE html>
     <html>
         <head>
+            <meta charset="UTF-8">
             <style>
                 body { font-family: Arial; margin: 2cm; }
                 h1 { color: #2c3e50; }
@@ -86,18 +79,15 @@ def criar_pdf(caminho_imagem=None, questoes=None):
         <body>
             <h1>Ebook de Questões para Estudo</h1>
     """
-
     if questoes:
         for i, questao in enumerate(questoes, start=1):
             html_content += f'<div class="questao"><strong>{i}.</strong> {questao["question"]}</div>'
-
     html_content += "</body></html>"
 
     # 2. Enviar para o Gotenberg
     files = {
-        'files': ('content.html', html_content, 'text/html')
+        'files': ('content.html', html_content, 'text/html; charset=utf-8')
     }
-    
     data = {
         'marginTop': '1',
         'marginBottom': '1',
@@ -111,35 +101,30 @@ def criar_pdf(caminho_imagem=None, questoes=None):
             files=files,
             data=data,
             stream=True,
-            timeout=10  # Adicionado o timeout aqui
+            timeout=10
         )
+        response.raise_for_status()  # Levanta exceção para erros HTTP
+        output_path = 'prova.pdf'
+        with open(output_path, 'wb') as f:
+            f.write(response.content)
+        return output_path
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Erro na geração do PDF com Gotenberg: {e}")
+        raise
 
-        if response.status_code == 200:
-            with open('prova.pdf', 'wb') as f:
-                f.write(response.content)
-            return True
-            
-    except Exception as e:
-        print(f"Erro na geração do PDF: {e}")
-        return False
-
-# === DOCX Creation Functions ===
 def criar_docx(caminho_imagem=None, questoes=None):
     doc = Document()
     doc.add_heading('Ebook de Questões para Estudo', 0)
-
     if questoes:
         for i, questao in enumerate(questoes, start=1):
             doc.add_paragraph(f"{i}. {questao['question']}")
-
     doc.save('prova.docx')
+    return 'prova.docx'
 
-# === EPUB Creation Functions ===
 def criar_epub(caminho_imagem=None, questoes=None):
     livro = epub.EpubBook()
     livro.set_title('Ebook de Questões para Estudo')
     livro.set_language('pt-BR')
-
     if questoes:
         capitulo = epub.EpubHtml(title='Questões', file_name='questoes.xhtml', lang='pt-BR')
         capitulo.content = "<h1>Questões</h1><ul>"
@@ -148,17 +133,32 @@ def criar_epub(caminho_imagem=None, questoes=None):
         capitulo.content += "</ul>"
         livro.add_item(capitulo)
         livro.toc = (epub.Link('questoes.xhtml', 'Questões', 'questoes'),)
-
     livro.add_item(epub.EpubNav())
     livro.add_item(epub.EpubNcx())
     epub.write_epub('prova.epub', livro)
+    return 'prova.epub'
 
 # === Celery Tasks ===
 @celery.task
 def gerar_pdf_async(prompt, formato, caminho_imagem=None):
-    # Lógica de geração (adaptada da rota /gerar_ebook)
-    # Retorne o caminho do arquivo gerado
-    pass  # Placeholder, já que a implementação está incompleta
+    if prompt:
+        questoes = generate_question(prompt)
+    else:
+        questoes = buscar_questoes("default")
+
+    if formato == "pdf":
+        caminho_arquivo = criar_pdf(caminho_imagem, questoes)
+    elif formato == "docx":
+        caminho_arquivo = criar_docx(caminho_imagem, questoes)
+    elif formato == "epub":
+        caminho_arquivo = criar_epub(caminho_imagem, questoes)
+    else:
+        raise ValueError("Formato inválido")
+
+    # Armazena no cache do Redis
+    cache_key = f"pdf:{prompt}:{formato}"
+    redis.setex(cache_key, 3600, caminho_arquivo)  # Expira em 1 hora
+    return caminho_arquivo
 
 # === Flask Routes ===
 @app.route('/')
@@ -172,7 +172,7 @@ def escolher_formato():
 @app.route('/gerar_ebook', methods=['POST'])
 def gerar_ebook():
     formato = request.form.get('formato')
-    prompt = request.form.get('prompt')  # Novo campo para o prompt do usuário
+    prompt = request.form.get('prompt')
     imagem = request.files.get('imagem')
     
     caminho_imagem = None
@@ -180,19 +180,26 @@ def gerar_ebook():
         caminho_imagem = os.path.join(app.config['UPLOAD_FOLDER'], imagem.filename)
         imagem.save(caminho_imagem)
 
-    # Enfileira a tarefa
     task = gerar_pdf_async.delay(prompt, formato, caminho_imagem)
-    
-    # Retorna um ID para acompanhamento
     return jsonify({"task_id": task.id}), 202
 
 @app.route('/status/<task_id>')
 def check_status(task_id):
     task = gerar_pdf_async.AsyncResult(task_id)
-    return jsonify({
-        "status": task.status,
-        "download_url": task.result if task.successful() else None
-    })
+    if task.successful():
+        caminho_arquivo = task.result
+        return jsonify({
+            "status": task.status,
+            "download_url": f"/download/{os.path.basename(caminho_arquivo)}"
+        })
+    return jsonify({"status": task.status, "download_url": None})
+
+@app.route('/download/<filename>')
+def download_file(filename):
+    caminho_arquivo = os.path.join(os.getcwd(), filename)
+    if os.path.exists(caminho_arquivo):
+        return send_file(caminho_arquivo, as_attachment=True)
+    return jsonify({"error": "Arquivo não encontrado"}), 404
 
 @app.route('/health')
 def health_check():
@@ -202,40 +209,15 @@ def health_check():
     except:
         return "Gotenberg offline", 500
 
-# Comentado: primeira versão de test_ia, mantive a segunda mais completa
-# @app.route('/test_ia')
-# def test_ia():
-#     # Gera questões usando o prompt "Química Orgânica"
-#     questoes = generate_question("Química Orgânica")
-#     
-#     # Garante que as questões estão no formato correto (lista de dicionários)
-#     if isinstance(questoes, list) and all(isinstance(q, dict) for q in questoes):
-#         return jsonify(questoes)
-#     else:
-#         return jsonify({"error": "Formato de questões inválido"}), 500
-
 @app.route('/test_ia')
 def test_ia():
     try:
-        # Gera questões
         questoes = generate_question("Química Orgânica")
-        
-        # Valida o formato
         if not isinstance(questoes, list):
             raise ValueError("Questões não são uma lista")
-            
-        # Converte para dicionários (se necessário)
-        questoes_serializaveis = []
-        for q in questoes:
-            if isinstance(q, dict):
-                questoes_serializaveis.append(q)
-            else:
-                questoes_serializaveis.append({"question": str(q)})
-                
-        # Trechos soltos incorporados aqui
+        
         questoes_serializaveis = [{"question": q["question"]} for q in questoes]
         return jsonify(questoes_serializaveis)
-        
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
