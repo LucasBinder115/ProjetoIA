@@ -1,0 +1,10 @@
+# Crie um docker-compose.yml na raiz do projeto
+version: '3'
+
+services:
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports:
+      - "3000:3000"
+    environment:
+      - DEFAULT_HTTP_TIMEOUT=30s
