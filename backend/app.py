@@ -1,5 +1,5 @@
 # === Imports ===
-from flask import Flask, render_template, send_file, request
+from flask import Flask, render_template, send_file, request, jsonify  # Adicionei jsonify
 import os
 import requests
 import nltk
@@ -21,8 +21,7 @@ from celery.signals import after_setup_logger
 
 # === Initial Setup ===
 nltk.download('punkt')
-app = Flask(__name__, template_folder='../templates',  # Caminho relativo para a pasta templates
- static_folder='../static')
+app = Flask(__name__, template_folder='../templates', static_folder='../static')  # Caminho relativo mantido
 app.config['UPLOAD_FOLDER'] = 'static/imagens'  # Folder for uploaded images
 
 # Configure o Celery
@@ -33,7 +32,6 @@ celery = Celery(
 )
 
 redis = Redis(host='localhost', port=6379)
-
 
 print(torch.__version__)  # Deve mostrar a versão instalada, ex.: 2.4.0
 print(torch.cuda.is_available())  # True se CUDA estiver configurado, False se for só CPU
@@ -55,7 +53,7 @@ def buscar_questoes(tema):
     return response.json()['results'] if response.status_code == 200 else []
 
 def generate_question(prompt, num_questions=10):
-    gerador = pipeline('text-generation', model='EleutherAI/gpt-neo-1.3B')  # Mantive a versão 1.3B como definida
+    gerador = pipeline('text-generation', model='EleutherAI/gpt-neo-1.3B')  # Mantive a versão 1.3B
     questions = []
     for i in range(num_questions):
         # Ajusta o prompt para gerar perguntas numeradas
@@ -186,7 +184,6 @@ def gerar_ebook():
     task = gerar_pdf_async.delay(prompt, formato, caminho_imagem)
     
     # Retorna um ID para acompanhamento
-    # NOTA: 'jsonify' não está importado, deve ser 'from flask import jsonify'
     return jsonify({"task_id": task.id}), 202
 
 @app.route('/status/<task_id>')
@@ -205,10 +202,42 @@ def health_check():
     except:
         return "Gotenberg offline", 500
 
+# Comentado: primeira versão de test_ia, mantive a segunda mais completa
+# @app.route('/test_ia')
+# def test_ia():
+#     # Gera questões usando o prompt "Química Orgânica"
+#     questoes = generate_question("Química Orgânica")
+#     
+#     # Garante que as questões estão no formato correto (lista de dicionários)
+#     if isinstance(questoes, list) and all(isinstance(q, dict) for q in questoes):
+#         return jsonify(questoes)
+#     else:
+#         return jsonify({"error": "Formato de questões inválido"}), 500
+
 @app.route('/test_ia')
 def test_ia():
-    questoes = generate_question("Química Orgânica")
-    return jsonify(questoes)
+    try:
+        # Gera questões
+        questoes = generate_question("Química Orgânica")
+        
+        # Valida o formato
+        if not isinstance(questoes, list):
+            raise ValueError("Questões não são uma lista")
+            
+        # Converte para dicionários (se necessário)
+        questoes_serializaveis = []
+        for q in questoes:
+            if isinstance(q, dict):
+                questoes_serializaveis.append(q)
+            else:
+                questoes_serializaveis.append({"question": str(q)})
+                
+        # Trechos soltos incorporados aqui
+        questoes_serializaveis = [{"question": q["question"]} for q in questoes]
+        return jsonify(questoes_serializaveis)
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # === Test Functions ===
 def test_gotenberg():
