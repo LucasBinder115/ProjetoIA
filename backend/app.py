@@ -37,9 +37,7 @@ nltk.download('punkt', quiet=True)
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['UPLOAD_FOLDER'] = 'static/imagens'
 celery = make_celery(app)
-
-# Move this line to ensure celery is fully initialized before task definition
-celery.conf.update(task_track_started=True)  # Optional: track task start
+celery.conf.update(task_track_started=True)  # Track task start
 
 redis = Redis(host='localhost', port=6379)
 
@@ -54,12 +52,27 @@ def gerar_html(questoes):
     pass
 
 def buscar_questoes(tema):
-    url = f"https://opentdb.com/api.php?amount=10&category=18&type=multiple"
-    response = requests.get(url)
-    if response.status_code == 200:
-        results = response.json()['results']
-        return [{"question": q["question"]} for q in results]
-    return [{"question": "Erro ao buscar questões"}]
+    if "química" in tema.lower():  # Check if "química" is in the prompt
+        return [
+            {"question": "Qual é a fórmula do benzeno?"},
+            {"question": "O que é uma ligação covalente?"},
+            {"question": "Qual é o principal componente do petróleo?"},
+            {"question": "O que caracteriza um composto orgânico?"},
+            {"question": "Qual é o grupo funcional de um álcool?"},
+            {"question": "O que é uma reação de combustão?"},
+            {"question": "Qual é a diferença entre alcano e alceno?"},
+            {"question": "O que é um éster?"},
+            {"question": "Qual é o produto da oxidação de um álcool primário?"},
+            {"question": "O que é isomerismo?"}
+        ]
+    else:
+        # Fallback to OpenTDB if not chemistry-related
+        url = f"https://opentdb.com/api.php?amount=10&category=18&type=multiple"
+        response = requests.get(url)
+        if response.status_code == 200:
+            results = response.json()['results']
+            return [{"question": q["question"]} for q in results]
+        return [{"question": "Erro ao buscar questões"}]
 
 # === File Creation Functions ===
 def criar_pdf(caminho_imagem=None, questoes=None):
@@ -83,7 +96,7 @@ def criar_pdf(caminho_imagem=None, questoes=None):
     html_content += "</body></html>"
 
     files = {
-        'files': ('index.html', html_content)
+        'files': ('index.html', html_content.encode('utf-8'))  # Ensure UTF-8 encoding for Portuguese
     }
     data = {
         'marginTop': '1',
@@ -101,10 +114,10 @@ def criar_pdf(caminho_imagem=None, questoes=None):
             timeout=10
         )
         response.raise_for_status()
-        output_path = 'prova.pdf'
+        output_path = os.path.join(os.getcwd(), 'prova.pdf')  # Use absolute path
         with open(output_path, 'wb') as f:
             f.write(response.content)
-        logging.info(f"PDF gerado com sucesso em {os.path.abspath(output_path)}")
+        logging.info(f"PDF gerado com sucesso em {output_path}")
         return output_path
     except requests.exceptions.RequestException as e:
         logging.error(f"Erro na geração do PDF com Gotenberg: {e}")
@@ -116,8 +129,9 @@ def criar_docx(caminho_imagem=None, questoes=None):
     if questoes:
         for i, questao in enumerate(questoes, start=1):
             doc.add_paragraph(f"{i}. {questao['question']}")
-    doc.save('prova.docx')
-    return 'prova.docx'
+    output_path = os.path.join(os.getcwd(), 'prova.docx')
+    doc.save(output_path)
+    return output_path
 
 def criar_epub(caminho_imagem=None, questoes=None):
     livro = epub.EpubBook()
@@ -133,13 +147,15 @@ def criar_epub(caminho_imagem=None, questoes=None):
         livro.toc = (epub.Link('questoes.xhtml', 'Questões', 'questoes'),)
     livro.add_item(epub.EpubNav())
     livro.add_item(epub.EpubNcx())
-    epub.write_epub('prova.epub', livro)
-    return 'prova.epub'
+    output_path = os.path.join(os.getcwd(), 'prova.epub')
+    epub.write_epub(output_path, livro)
+    return output_path
 
 # === Celery Tasks ===
-@celery.task(name='app.gerar_pdf_async')  # Explicitly name the task
+@celery.task(name='app.gerar_pdf_async')
 def gerar_pdf_async(prompt, formato, caminho_imagem=None):
     questoes = buscar_questoes(prompt if prompt else "default")
+    caminho_arquivo = None
 
     if formato == "pdf":
         caminho_arquivo = criar_pdf(caminho_imagem, questoes)
@@ -187,10 +203,14 @@ def check_status(task_id):
     task = gerar_pdf_async.AsyncResult(task_id)
     if task.successful():
         caminho_arquivo = task.result
-        return jsonify({
-            "status": task.status,
-            "download_url": f"/download/{os.path.basename(caminho_arquivo)}"
-        })
+        if os.path.exists(caminho_arquivo):
+            return jsonify({
+                "status": task.status,
+                "download_url": f"/download/{os.path.basename(caminho_arquivo)}"
+            })
+        else:
+            logging.error(f"Arquivo não encontrado no status: {caminho_arquivo}")
+            return jsonify({"status": "FAILURE", "download_url": None, "error": "Arquivo não encontrado no servidor"})
     return jsonify({"status": task.status, "download_url": None})
 
 @app.route('/download/<filename>')
@@ -198,6 +218,7 @@ def download_file(filename):
     caminho_arquivo = os.path.join(os.getcwd(), filename)
     if os.path.exists(caminho_arquivo):
         return send_file(caminho_arquivo, as_attachment=True)
+    logging.error(f"Arquivo não encontrado para download: {caminho_arquivo}")
     return jsonify({"error": "Arquivo não encontrado"}), 404
 
 @app.route('/health')

@@ -138,3 +138,46 @@ you should set broker_connection_retry_on_startup to True.
 mingle: searching for neighbors
 mingle: all alone
 celery@LucasPc ready.
+Task app.gerar_pdf_async[58c39f7a-28ac-4091-8437-a5b1b2777fb9] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[58c39f7a-28ac-4091-8437-a5b1b2777fb9] succeeded in 3.299827999988338s: 'prova.pdf'
+Task app.gerar_pdf_async[6f04a6a5-cdae-4634-a420-7439a0da98d8] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[6f04a6a5-cdae-4634-a420-7439a0da98d8] succeeded in 0.5755391999846324s: 'prova.pdf'
+Task app.gerar_pdf_async[59f30877-bbc3-4cd9-9196-abd906dececc] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[59f30877-bbc3-4cd9-9196-abd906dececc] succeeded in 0.6569957000028808s: 'prova.pdf'
+Task app.gerar_pdf_async[d94a3fc2-b100-4e10-8e8e-2560c55fec26] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[d94a3fc2-b100-4e10-8e8e-2560c55fec26] succeeded in 0.6323253000155091s: 'prova.pdf'
+Task app.gerar_pdf_async[90f9b100-34b6-4357-beda-d545faa4a08b] received
+Task app.gerar_pdf_async[90f9b100-34b6-4357-beda-d545faa4a08b] succeeded in 0.5490691000013612s: 'prova.docx'
+Task app.gerar_pdf_async[fad37228-db96-4728-b4e9-613d65a6209f] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[fad37228-db96-4728-b4e9-613d65a6209f] succeeded in 0.6879416999872774s: 'prova.pdf'
+Task app.gerar_pdf_async[672bd647-188f-460d-b922-b69c4729b66c] received
+Task app.gerar_pdf_async[672bd647-188f-460d-b922-b69c4729b66c] succeeded in 0.521168100007344s: 'prova.docx'
+Task app.gerar_pdf_async[a666225c-7e4a-4711-abe7-933c62b2ba3a] received
+Task app.gerar_pdf_async[a666225c-7e4a-4711-abe7-933c62b2ba3a] succeeded in 0.5099167000153102s: 'prova.docx'
+Task app.gerar_pdf_async[6146fa6e-bfd2-4389-9660-47e64991936d] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[6146fa6e-bfd2-4389-9660-47e64991936d] succeeded in 0.6384018000098877s: 'prova.pdf'
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+Connected to redis://localhost:6379/0
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+mingle: searching for neighbors
+mingle: all alone
+celery@LucasPc ready.
+Task app.gerar_pdf_async[b27a8db7-35e2-40b7-9e6a-bcebf4872270] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[b27a8db7-35e2-40b7-9e6a-bcebf4872270] succeeded in 0.23325549997389317s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'
