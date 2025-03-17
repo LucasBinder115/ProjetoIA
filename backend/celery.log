@@ -181,3 +181,21 @@ celery@LucasPc ready.
 Task app.gerar_pdf_async[b27a8db7-35e2-40b7-9e6a-bcebf4872270] received
 PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
 Task app.gerar_pdf_async[b27a8db7-35e2-40b7-9e6a-bcebf4872270] succeeded in 0.23325549997389317s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'
+Task app.gerar_pdf_async[55583cf2-1de5-4343-883d-9b0825feb5a4] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[55583cf2-1de5-4343-883d-9b0825feb5a4] succeeded in 0.6285138999810442s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'
+Task app.gerar_pdf_async[f730c44b-05da-4e3e-a3f7-6c5e27fc3ba4] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[f730c44b-05da-4e3e-a3f7-6c5e27fc3ba4] succeeded in 0.6204137000022456s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'
+Task app.gerar_pdf_async[0421b21b-0831-49a8-8c58-ff218b3493a7] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[0421b21b-0831-49a8-8c58-ff218b3493a7] succeeded in 0.6371968000021297s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'
+Task app.gerar_pdf_async[b7335c79-eff0-4301-b04e-075fa3c85c94] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[b7335c79-eff0-4301-b04e-075fa3c85c94] succeeded in 0.608685700019123s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'
+Task app.gerar_pdf_async[a4fb03af-298f-4e0d-acfb-2704f247828d] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[a4fb03af-298f-4e0d-acfb-2704f247828d] succeeded in 0.683345500001451s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'
+Task app.gerar_pdf_async[d99cd3ed-e3d9-43f2-a149-888ad418fa23] received
+PDF gerado com sucesso em C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf
+Task app.gerar_pdf_async[d99cd3ed-e3d9-43f2-a149-888ad418fa23] succeeded in 0.6217577000206802s: 'C:\Users\frago\Documents\GitHub\ProjetoIA\backend\prova.pdf'

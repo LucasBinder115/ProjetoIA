@@ -52,8 +52,9 @@ def gerar_html(questoes):
     pass
 
 def buscar_questoes(tema):
-    if "química" in tema.lower():  # Check if "química" is in the prompt
-        return [
+    # Dicionário de questionários em português
+    questionarios = {
+        "química": [
             {"question": "Qual é a fórmula do benzeno?"},
             {"question": "O que é uma ligação covalente?"},
             {"question": "Qual é o principal componente do petróleo?"},
@@ -64,15 +65,53 @@ def buscar_questoes(tema):
             {"question": "O que é um éster?"},
             {"question": "Qual é o produto da oxidação de um álcool primário?"},
             {"question": "O que é isomerismo?"}
+        ],
+        "matemática": [
+            {"question": "Qual é a fórmula da área de um círculo?"},
+            {"question": "O que é um número primo?"},
+            {"question": "Como se resolve uma equação de segundo grau?"},
+            {"question": "O que é a soma dos ângulos internos de um triângulo?"},
+            {"question": "Qual é o valor de π aproximado?"},
+            {"question": "O que é uma função linear?"},
+            {"question": "Qual é a derivada de x²?"},
+            {"question": "O que é um polígono regular?"},
+            {"question": "Como se calcula o volume de um cubo?"},
+            {"question": "O que é a propriedade distributiva?"}
+        ],
+        "física": [
+            {"question": "O que é a primeira lei de Newton?"},
+            {"question": "Qual é a unidade de força no SI?"},
+            {"question": "O que é energia cinética?"},
+            {"question": "Qual é a fórmula da velocidade média?"},
+            {"question": "O que é a lei da gravitação universal?"},
+            {"question": "O que é um movimento uniformemente acelerado?"},
+            {"question": "Qual é a unidade de energia?"},
+            {"question": "O que é a conservação da energia mecânica?"},
+            {"question": "Qual é a fórmula da força peso?"},
+            {"question": "O que é um vetor?"}
+        ],
+        "história": [
+            {"question": "Quem descobriu o Brasil?"},
+            {"question": "O que foi a Revolução Industrial?"},
+            {"question": "Qual foi o principal evento da Segunda Guerra Mundial?"},
+            {"question": "O que é o Tratado de Tordesilhas?"},
+            {"question": "Quem foi Dom Pedro II?"},
+            {"question": "O que causou a Independência do Brasil?"},
+            {"question": "O que foi o Renascimento?"},
+            {"question": "Qual era o objetivo das Grandes Navegações?"},
+            {"question": "O que foi a Revolução Francesa?"},
+            {"question": "Quem foi Tiradentes?"}
         ]
-    else:
-        # Fallback to OpenTDB if not chemistry-related
-        url = f"https://opentdb.com/api.php?amount=10&category=18&type=multiple"
-        response = requests.get(url)
-        if response.status_code == 200:
-            results = response.json()['results']
-            return [{"question": q["question"]} for q in results]
-        return [{"question": "Erro ao buscar questões"}]
+    }
+
+    # Normaliza o tema para minúsculas e busca correspondência
+    tema = tema.lower()
+    for chave, perguntas in questionarios.items():
+        if chave in tema:
+            return perguntas
+    
+    # Fallback se nenhum tema for encontrado
+    return [{"question": "Nenhum questionário encontrado para o tema especificado."}]
 
 # === File Creation Functions ===
 def criar_pdf(caminho_imagem=None, questoes=None):
