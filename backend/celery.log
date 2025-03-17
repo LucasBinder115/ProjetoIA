@@ -1,0 +1,62 @@
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+Connected to redis://localhost:6379/0
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+mingle: searching for neighbors
+mingle: all alone
+celery@LucasPc ready.
+Task app.gerar_pdf_async[da318b25-01ae-4ba9-aca0-e11236aa5311] received
+Restoring 1 unacknowledged message(s)
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+Connected to redis://localhost:6379/0
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+mingle: searching for neighbors
+mingle: all alone
+celery@LucasPc ready.
+Task app.gerar_pdf_async[da318b25-01ae-4ba9-aca0-e11236aa5311] received
+Task app.gerar_pdf_async[da318b25-01ae-4ba9-aca0-e11236aa5311] raised unexpected: ValueError('Formato inválido')
+Traceback (most recent call last):
+  File "C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\app\trace.py", line 453, in trace_task
+    R = retval = fun(*args, **kwargs)
+                 ~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\frago\Documents\GitHub\ProjetoIA\backend\app.py", line 33, in __call__
+    return self.run(*args, **kwargs)
+           ~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\frago\Documents\GitHub\ProjetoIA\backend\app.py", line 163, in gerar_pdf_async
+    raise ValueError("Formato inválido")
+ValueError: Formato inválido
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+Connected to redis://localhost:6379/0
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+mingle: searching for neighbors
+mingle: all alone
+celery@LucasPc ready.

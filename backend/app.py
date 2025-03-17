@@ -19,21 +19,29 @@ from redis import Redis
 import logging
 from celery.signals import after_setup_logger
 
-# === Initial Setup ===
-nltk.download('punkt', quiet=True)  # Silent download
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
-app.config['UPLOAD_FOLDER'] = 'static/imagens'  # Folder for uploaded images
+# === Celery Setup ===
+def make_celery(flask_app):
+    celery_app = Celery(
+        flask_app.import_name,
+        broker='redis://localhost:6379/0',
+        backend='redis://localhost:6379/0'
+    )
+    celery_app.conf.update(flask_app.config)
+    class ContextTask(celery_app.Task):
+        def __call__(self, *args, **kwargs):
+            with flask_app.app_context():
+                return self.run(*args, **kwargs)
+    celery_app.Task = ContextTask
+    return celery_app
 
-# Configure Celery
-celery = Celery(
-    app.name,
-    broker='redis://localhost:6379/0',
-    backend='redis://localhost:6379/0'
-)
+# === Initial Setup ===
+nltk.download('punkt', quiet=True)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app.config['UPLOAD_FOLDER'] = 'static/imagens'
+celery = make_celery(app)  # Initialize Celery with Flask app
 
 redis = Redis(host='localhost', port=6379)
 
-# Log PyTorch setup (for debugging, remove later if desired)
 logging.info(f"PyTorch version: {torch.__version__}")
 logging.info(f"CUDA available: {torch.cuda.is_available()}")
 
@@ -45,7 +53,6 @@ def setup_loggers(logger, *args, **kwargs):
 # === Helper Functions ===
 @lru_cache(maxsize=100)
 def gerar_html(questoes):
-    # Placeholder - implement if needed
     pass
 
 def buscar_questoes(tema):
@@ -85,7 +92,7 @@ def criar_pdf(caminho_imagem=None, questoes=None):
     html_content += "</body></html>"
 
     files = {
-        'files': ('index.html', html_content)  # Simplified MIME type
+        'files': ('index.html', html_content)
     }
     data = {
         'marginTop': '1',
@@ -137,7 +144,6 @@ def criar_epub(caminho_imagem=None, questoes=None):
     livro.add_item(epub.EpubNcx())
     epub.write_epub('prova.epub', livro)
     return 'prova.epub'
-
 # === Celery Tasks ===
 @celery.task
 def gerar_pdf_async(prompt, formato, caminho_imagem=None):
@@ -153,27 +159,25 @@ def gerar_pdf_async(prompt, formato, caminho_imagem=None):
     elif formato == "epub":
         caminho_arquivo = criar_epub(caminho_imagem, questoes)
     else:
-        raise ValueError("Formato inválido")
+        logging.error(f"Formato inválido recebido: {formato}")
+        raise ValueError(f"Formato inválido: {formato}. Use 'pdf', 'docx', ou 'epub'.")
 
     cache_key = f"pdf:{prompt}:{formato}"
     redis.setex(cache_key, 3600, caminho_arquivo)
     return caminho_arquivo
 
 # === Flask Routes ===
-@app.route('/')
-def index():
-    return render_template('index.html')
-
-@app.route('/escolher_formato')
-def escolher_formato():
-    return render_template('escolher_formato.html')
-
 @app.route('/gerar_ebook', methods=['POST'])
 def gerar_ebook():
     formato = request.form.get('formato')
     prompt = request.form.get('prompt')
     imagem = request.files.get('imagem')
-    
+
+    # Validate formato before queuing the task
+    valid_formats = {"pdf", "docx", "epub"}
+    if not formato or formato not in valid_formats:
+        return jsonify({"error": "Formato inválido. Use 'pdf', 'docx', ou 'epub'."}), 400
+
     caminho_imagem = None
     if imagem:
         caminho_imagem = os.path.join(app.config['UPLOAD_FOLDER'], imagem.filename)
@@ -215,7 +219,6 @@ def test_ia():
         questoes = generate_question("Química Orgânica")
         if not isinstance(questoes, list):
             raise ValueError("Questões não são uma lista")
-        
         questoes_serializaveis = [{"question": q["question"]} for q in questoes]
         return jsonify(questoes_serializaveis)
     except Exception as e:
