@@ -60,3 +60,81 @@ you should set broker_connection_retry_on_startup to True.
 mingle: searching for neighbors
 mingle: all alone
 celery@LucasPc ready.
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+Connected to redis://localhost:6379/0
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+mingle: searching for neighbors
+mingle: all alone
+celery@LucasPc ready.
+Received unregistered task of type '__main__.gerar_pdf_async'.
+The message has been ignored and discarded.
+
+Did you remember to import the module containing this task?
+Or maybe you're using relative imports?
+
+Please see
+https://docs.celeryq.dev/en/latest/internals/protocol.html
+for more information.
+
+The full contents of the message body was:
+b'[["Qu\\u00edmica Org\\u00e2nica", "pdf", null], {}, {"callbacks": null, "errbacks": null, "chain": null, "chord": null}]' (118b)
+
+The full contents of the message headers:
+{'lang': 'py', 'task': '__main__.gerar_pdf_async', 'id': '8eddd014-66ac-488d-b468-8cde94b5d179', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': '8eddd014-66ac-488d-b468-8cde94b5d179', 'parent_id': None, 'argsrepr': "('Química Orgânica', 'pdf', None)", 'kwargsrepr': '{}', 'origin': 'gen12428@LucasPc', 'ignore_result': False, 'replaced_task_nesting': 0, 'stamped_headers': None, 'stamps': {}}
+
+The delivery info for this task is:
+{'exchange': '', 'routing_key': 'celery'}
+Traceback (most recent call last):
+  File "C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py", line 659, in on_task_received
+    strategy = strategies[type_]
+               ~~~~~~~~~~^^^^^^^
+KeyError: '__main__.gerar_pdf_async'
+Received unregistered task of type '__main__.gerar_pdf_async'.
+The message has been ignored and discarded.
+
+Did you remember to import the module containing this task?
+Or maybe you're using relative imports?
+
+Please see
+https://docs.celeryq.dev/en/latest/internals/protocol.html
+for more information.
+
+The full contents of the message body was:
+b'[["Qu\\u00edmica Org\\u00e2nica", "pdf", null], {}, {"callbacks": null, "errbacks": null, "chain": null, "chord": null}]' (118b)
+
+The full contents of the message headers:
+{'lang': 'py', 'task': '__main__.gerar_pdf_async', 'id': 'd354b6e8-e1e1-45e8-8312-5f7d36aee42f', 'shadow': None, 'eta': None, 'expires': None, 'group': None, 'group_index': None, 'retries': 0, 'timelimit': [None, None], 'root_id': 'd354b6e8-e1e1-45e8-8312-5f7d36aee42f', 'parent_id': None, 'argsrepr': "('Química Orgânica', 'pdf', None)", 'kwargsrepr': '{}', 'origin': 'gen6448@LucasPc', 'ignore_result': False, 'replaced_task_nesting': 0, 'stamped_headers': None, 'stamps': {}}
+
+The delivery info for this task is:
+{'exchange': '', 'routing_key': 'celery'}
+Traceback (most recent call last):
+  File "C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py", line 659, in on_task_received
+    strategy = strategies[type_]
+               ~~~~~~~~~~^^^^^^^
+KeyError: '__main__.gerar_pdf_async'
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+Connected to redis://localhost:6379/0
+C:\Users\frago\Documents\GitHub\ProjetoIA\venv\Lib\site-packages\celery\worker\consumer\consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+mingle: searching for neighbors
+mingle: all alone
+celery@LucasPc ready.

@@ -38,6 +38,9 @@ app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['UPLOAD_FOLDER'] = 'static/imagens'
 celery = make_celery(app)
 
+# Move this line to ensure celery is fully initialized before task definition
+celery.conf.update(task_track_started=True)  # Optional: track task start
+
 redis = Redis(host='localhost', port=6379)
 
 # === Celery Configuration ===
@@ -54,10 +57,9 @@ def buscar_questoes(tema):
     url = f"https://opentdb.com/api.php?amount=10&category=18&type=multiple"
     response = requests.get(url)
     if response.status_code == 200:
-        # Adapt OpenTDB results to match expected format
         results = response.json()['results']
         return [{"question": q["question"]} for q in results]
-    return [{"question": "Erro ao buscar questões"}]  # Fallback
+    return [{"question": "Erro ao buscar questões"}]
 
 # === File Creation Functions ===
 def criar_pdf(caminho_imagem=None, questoes=None):
@@ -135,9 +137,8 @@ def criar_epub(caminho_imagem=None, questoes=None):
     return 'prova.epub'
 
 # === Celery Tasks ===
-@celery.task
+@celery.task(name='app.gerar_pdf_async')  # Explicitly name the task
 def gerar_pdf_async(prompt, formato, caminho_imagem=None):
-    # Use buscar_questoes instead of generate_question
     questoes = buscar_questoes(prompt if prompt else "default")
 
     if formato == "pdf":
@@ -211,7 +212,7 @@ def health_check():
 @app.route('/test_ia')
 def test_ia():
     try:
-        questoes = buscar_questoes("Química Orgânica")  # Updated to use buscar_questoes
+        questoes = buscar_questoes("Química Orgânica")
         if not isinstance(questoes, list):
             raise ValueError("Questões não são uma lista")
         questoes_serializaveis = [{"question": q["question"]} for q in questoes]
@@ -228,5 +229,4 @@ def test_gotenberg():
 # === Main Execution ===
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    # test_gotenberg()  # Uncomment to test Gotenberg directly
     app.run(debug=True)

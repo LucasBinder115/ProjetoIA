@@ -9,18 +9,57 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container text-center mt-5">
-        <h1 class="mb-4">Gerar Ebook de Questões</h1>
-        <p class="lead">Digite as questões para gerar seu eBook:</p>
+    <div class="container mt-5">
+        <h1 class="mb-4 text-center">Gerar Ebook de Questões</h1>
+        <p class="lead text-center mb-4">Crie seu ebook personalizado com questões para estudo!</p>
         
-        <form action="/gerar_ebook" method="POST">
+        <form action="/gerar_ebook" method="POST" enctype="multipart/form-data" class="formato-form">
+            <!-- Prompt Field -->
             <div class="mb-3">
-                <textarea class="form-control" name="conteudo" rows="5" placeholder="Digite suas questões aqui..."></textarea>
+                <label for="prompt" class="form-label">Descreva o tema do seu estudo:</label>
+                <textarea 
+                    class="form-control shadow-sm" 
+                    id="prompt" 
+                    name="prompt" 
+                    rows="3" 
+                    placeholder="Ex: Ciência da Computação, Matemática para o ENEM..."
+                    required
+                ></textarea>
             </div>
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-book"></i> Gerar eBook
+
+            <!-- Format Options -->
+            <div class="mb-3">
+                <label class="form-label">Escolha o formato:</label>
+                <div class="formato-options">
+                    <div class="form-check formato-option">
+                        <input class="form-check-input" type="radio" name="formato" id="pdf" value="pdf" checked>
+                        <label class="form-check-label" for="pdf">PDF</label>
+                    </div>
+                    <div class="form-check formato-option">
+                        <input class="form-check-input" type="radio" name="formato" id="docx" value="docx">
+                        <label class="form-check-label" for="docx">DOCX</label>
+                    </div>
+                    <div class="form-check formato-option">
+                        <input class="form-check-input" type="radio" name="formato" id="epub" value="epub">
+                        <label class="form-check-label" for="epub">EPUB</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Upload (Optional) -->
+            <div class="mb-3">
+                <label for="imagem" class="form-label">Adicione uma imagem (opcional):</label>
+                <input type="file" class="form-control shadow-sm" id="imagem" name="imagem" accept="image/*">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+                <i class="fas fa-download"></i> Gerar Ebook
             </button>
         </form>
+
+        <!-- Status Display -->
+        <div id="status" class="mt-3 text-center" style="display: none;"></div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
