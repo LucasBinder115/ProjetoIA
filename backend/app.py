@@ -11,8 +11,6 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Image, Page
 from reportlab.lib.units import inch
 from docx import Document
 from ebooklib import epub
-from transformers import pipeline
-import torch
 from functools import lru_cache
 from celery import Celery
 from redis import Redis
@@ -38,12 +36,9 @@ def make_celery(flask_app):
 nltk.download('punkt', quiet=True)
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['UPLOAD_FOLDER'] = 'static/imagens'
-celery = make_celery(app)  # Initialize Celery with Flask app
+celery = make_celery(app)
 
 redis = Redis(host='localhost', port=6379)
-
-logging.info(f"PyTorch version: {torch.__version__}")
-logging.info(f"CUDA available: {torch.cuda.is_available()}")
 
 # === Celery Configuration ===
 @after_setup_logger.connect
@@ -58,17 +53,11 @@ def gerar_html(questoes):
 def buscar_questoes(tema):
     url = f"https://opentdb.com/api.php?amount=10&category=18&type=multiple"
     response = requests.get(url)
-    return response.json()['results'] if response.status_code == 200 else []
-
-def generate_question(prompt, num_questions=10):
-    gerador = pipeline('text-generation', model='EleutherAI/gpt-neo-1.3B')
-    questions = []
-    for i in range(num_questions):
-        input_prompt = f"Crie a questão {i+1} sobre {prompt}. Formato: '{i+1}. [pergunta]'"
-        generated = gerador(input_prompt, max_length=100, num_return_sequences=1)[0]['generated_text']
-        question = generated.split(f"{i+1}. ")[-1].strip()
-        questions.append({'question': question})
-    return questions
+    if response.status_code == 200:
+        # Adapt OpenTDB results to match expected format
+        results = response.json()['results']
+        return [{"question": q["question"]} for q in results]
+    return [{"question": "Erro ao buscar questões"}]  # Fallback
 
 # === File Creation Functions ===
 def criar_pdf(caminho_imagem=None, questoes=None):
@@ -113,7 +102,7 @@ def criar_pdf(caminho_imagem=None, questoes=None):
         output_path = 'prova.pdf'
         with open(output_path, 'wb') as f:
             f.write(response.content)
-        logging.info("PDF gerado com sucesso em 'prova.pdf'")
+        logging.info(f"PDF gerado com sucesso em {os.path.abspath(output_path)}")
         return output_path
     except requests.exceptions.RequestException as e:
         logging.error(f"Erro na geração do PDF com Gotenberg: {e}")
@@ -144,13 +133,12 @@ def criar_epub(caminho_imagem=None, questoes=None):
     livro.add_item(epub.EpubNcx())
     epub.write_epub('prova.epub', livro)
     return 'prova.epub'
+
 # === Celery Tasks ===
 @celery.task
 def gerar_pdf_async(prompt, formato, caminho_imagem=None):
-    if prompt:
-        questoes = generate_question(prompt)
-    else:
-        questoes = buscar_questoes("default")
+    # Use buscar_questoes instead of generate_question
+    questoes = buscar_questoes(prompt if prompt else "default")
 
     if formato == "pdf":
         caminho_arquivo = criar_pdf(caminho_imagem, questoes)
@@ -167,13 +155,20 @@ def gerar_pdf_async(prompt, formato, caminho_imagem=None):
     return caminho_arquivo
 
 # === Flask Routes ===
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/escolher_formato')
+def escolher_formato():
+    return render_template('escolher_formato.html')
+
 @app.route('/gerar_ebook', methods=['POST'])
 def gerar_ebook():
     formato = request.form.get('formato')
     prompt = request.form.get('prompt')
     imagem = request.files.get('imagem')
 
-    # Validate formato before queuing the task
     valid_formats = {"pdf", "docx", "epub"}
     if not formato or formato not in valid_formats:
         return jsonify({"error": "Formato inválido. Use 'pdf', 'docx', ou 'epub'."}), 400
@@ -216,7 +211,7 @@ def health_check():
 @app.route('/test_ia')
 def test_ia():
     try:
-        questoes = generate_question("Química Orgânica")
+        questoes = buscar_questoes("Química Orgânica")  # Updated to use buscar_questoes
         if not isinstance(questoes, list):
             raise ValueError("Questões não são uma lista")
         questoes_serializaveis = [{"question": q["question"]} for q in questoes]
@@ -233,5 +228,5 @@ def test_gotenberg():
 # === Main Execution ===
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    # test_gotenberg()  # Commented out to avoid startup errors
+    # test_gotenberg()  # Uncomment to test Gotenberg directly
     app.run(debug=True)
