@@ -20,11 +20,11 @@ import logging
 from celery.signals import after_setup_logger
 
 # === Initial Setup ===
-nltk.download('punkt')
+nltk.download('punkt', quiet=True)  # Silent download
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['UPLOAD_FOLDER'] = 'static/imagens'  # Folder for uploaded images
 
-# Configure o Celery
+# Configure Celery
 celery = Celery(
     app.name,
     broker='redis://localhost:6379/0',
@@ -33,8 +33,9 @@ celery = Celery(
 
 redis = Redis(host='localhost', port=6379)
 
-print(torch.__version__)  # Deve mostrar a versão instalada, ex.: 2.4.0
-print(torch.cuda.is_available())  # True se CUDA estiver configurado, False se for só CPU
+# Log PyTorch setup (for debugging, remove later if desired)
+logging.info(f"PyTorch version: {torch.__version__}")
+logging.info(f"CUDA available: {torch.cuda.is_available()}")
 
 # === Celery Configuration ===
 @after_setup_logger.connect
@@ -44,7 +45,7 @@ def setup_loggers(logger, *args, **kwargs):
 # === Helper Functions ===
 @lru_cache(maxsize=100)
 def gerar_html(questoes):
-    # Lógica de geração de HTML (placeholder)
+    # Placeholder - implement if needed
     pass
 
 def buscar_questoes(tema):
@@ -64,7 +65,6 @@ def generate_question(prompt, num_questions=10):
 
 # === File Creation Functions ===
 def criar_pdf(caminho_imagem=None, questoes=None):
-    # 1. Criar HTML dinâmico
     html_content = """
     <!DOCTYPE html>
     <html>
@@ -84,9 +84,8 @@ def criar_pdf(caminho_imagem=None, questoes=None):
             html_content += f'<div class="questao"><strong>{i}.</strong> {questao["question"]}</div>'
     html_content += "</body></html>"
 
-    # 2. Enviar para o Gotenberg
     files = {
-        'files': ('content.html', html_content, 'text/html; charset=utf-8')
+        'files': ('index.html', html_content)  # Simplified MIME type
     }
     data = {
         'marginTop': '1',
@@ -103,10 +102,11 @@ def criar_pdf(caminho_imagem=None, questoes=None):
             stream=True,
             timeout=10
         )
-        response.raise_for_status()  # Levanta exceção para erros HTTP
+        response.raise_for_status()
         output_path = 'prova.pdf'
         with open(output_path, 'wb') as f:
             f.write(response.content)
+        logging.info("PDF gerado com sucesso em 'prova.pdf'")
         return output_path
     except requests.exceptions.RequestException as e:
         logging.error(f"Erro na geração do PDF com Gotenberg: {e}")
@@ -155,9 +155,8 @@ def gerar_pdf_async(prompt, formato, caminho_imagem=None):
     else:
         raise ValueError("Formato inválido")
 
-    # Armazena no cache do Redis
     cache_key = f"pdf:{prompt}:{formato}"
-    redis.setex(cache_key, 3600, caminho_arquivo)  # Expira em 1 hora
+    redis.setex(cache_key, 3600, caminho_arquivo)
     return caminho_arquivo
 
 # === Flask Routes ===
@@ -204,9 +203,10 @@ def download_file(filename):
 @app.route('/health')
 def health_check():
     try:
-        requests.get('http://localhost:3000/health')
+        response = requests.get('http://localhost:3000/health')
+        response.raise_for_status()
         return "OK", 200
-    except:
+    except requests.exceptions.RequestException:
         return "Gotenberg offline", 500
 
 @app.route('/test_ia')
@@ -229,5 +229,6 @@ def test_gotenberg():
 
 # === Main Execution ===
 if __name__ == '__main__':
-    test_gotenberg()  # Remova após testes
+    logging.basicConfig(level=logging.INFO)
+    # test_gotenberg()  # Commented out to avoid startup errors
     app.run(debug=True)
