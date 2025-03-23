@@ -17,8 +17,8 @@ Recolher
 Encapsular
 
 Copiar
-git clone <URL_DO_REPOSITORIO>
-cd <NOME_DA_PASTA>
+git clone <https://github.com/LucasBinder115/ProjetoIA.git>
+cd <ProjetoIA>
 Caso contrário, apenas coloque os arquivos na pasta do projeto.
 
 Passo 2: Instalar Dependências Python
