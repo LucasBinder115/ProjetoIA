@@ -2,13 +2,120 @@
 <html>
 <head>
     <title>Gerar Questionário</title>
+    <style>
+        /* Estilo geral */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Container do formulário */
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* Título da página */
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        /* Estilo dos labels */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        /* Campo de texto (título) */
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        /* Área de texto (perguntas) */
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+
+        /* Botão */
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsividade */
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Gerar Questionário em PDF</h1>
-    <form method="POST" action="/gerar-pdf">
-        <label>Perguntas (uma por linha):</label><br>
-        <textarea name="perguntas" rows="5" cols="50"></textarea><br>
-        <input type="submit" value="Baixar PDF">
-    </form>
+    <div class="container">
+        <h1>Crie seu Questionário em PDF</h1>
+        <form method="POST" action="/gerar-pdf">
+            <label>Título do Questionário:</label>
+            <input type="text" name="titulo" placeholder="Ex.: Prova de Matemática 2025" value="Questionário Personalizado">
+            
+            <label>Digite suas perguntas (uma por linha):</label>
+            <textarea name="perguntas" placeholder="Exemplo:
+Qual é a capital do Brasil?
+Quanto é 2 + 2?"></textarea>
+            
+            <button type="submit">Baixar PDF</button>
+        </form>
+    </div>
 </body>
 </html>
