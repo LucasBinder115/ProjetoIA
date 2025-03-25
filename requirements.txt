@@ -1,9 +1,0 @@
-flask
-celery
-redis
-requests
-transformers
-torch
-reportlab
-python-docx
-ebooklib
