@@ -1,121 +1,149 @@
-<!DOCTYPE html>
 <html>
 <head>
-    <title>Gerar Questionário</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de PDF - Questionário</title>
     <style>
-        /* Estilo geral */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #f8f9fa;
+        }
+
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.6;
+            margin: 2rem;
+            background-color: var(--background-color);
+            color: var(--primary-color);
         }
 
-        /* Container do formulário */
         .container {
-            background-color: white;
-            padding: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
             border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 500px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
-        /* Título da página */
-        h1 {
-            color: #333;
+        .header {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
         }
 
-        /* Estilo dos labels */
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
+        h1 {
+            color: var(--secondary-color);
+            font-size: 2.5rem;
+            margin: 0 0 0.5rem 0;
+        }
+
+        .metadata {
+            text-align: right;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        ol {
+            counter-reset: item;
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--secondary-color);
+            transition: transform 0.2s;
+            counter-increment: item;
+        }
+
+        li:hover {
+            transform: translateX(5px);
+            background-color: #f1f1f1;
+        }
+
+        li::before {
+            content: counter(item);
             font-weight: bold;
+            margin-right: 1rem;
+            color: var(--secondary-color);
         }
 
-        /* Campo de texto (título) */
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-
-        /* Área de texto (perguntas) */
-        textarea {
-            width: 100%;
-            height: 200px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-            resize: vertical;
-            box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-        textarea:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-
-        /* Botão */
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-
-        /* Responsividade */
-        @media (max-width: 600px) {
+        @media print {
             .container {
-                margin: 20px;
-                padding: 20px;
+                box-shadow: none;
+                padding: 0;
             }
-            h1 {
-                font-size: 20px;
+            li {
+                background-color: transparent;
+                border-left: none;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Crie seu Questionário em PDF</h1>
-        <form method="POST" action="/gerar-pdf">
-            <label>Título do Questionário:</label>
-            <input type="text" name="titulo" placeholder="Ex.: Prova de Matemática 2025" value="Questionário Personalizado">
-            
-            <label>Digite suas perguntas (uma por linha):</label>
-            <textarea name="perguntas" placeholder="Exemplo:
-Qual é a capital do Brasil?
-Quanto é 2 + 2?"></textarea>
-            
-            <button type="submit">Baixar PDF</button>
-        </form>
+        <header class="header">
+            <h1 id="documentTitle">ALGUM TITULO</h1>
+            <p>Questionário Profissional</p>
+        </header>
+
+        <div class="metadata">
+            <p>Gerado em: <span id="currentDate">24/03/2025</span></p>
+            <p>Total de perguntas: <span id="questionCount">0</span></p>
+        </div>
+
+        <main>
+            <ol id="questionsList">
+                <li>QUAL E A FINAL DA CIMIPIONS</li>
+                <!-- Novas perguntas serão adicionadas aqui via JavaScript -->
+            </ol>
+        </main>
     </div>
+
+    <script>
+        // Atualização automática da data
+        function updateDate() {
+            const now = new Date();
+            const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            document.getElementById('currentDate').textContent = 
+                now.toLocaleDateString('pt-BR', options);
+        }
+
+        // Contador de perguntas
+        function updateQuestionCount() {
+            const count = document.querySelectorAll('#questionsList li').length;
+            document.getElementById('questionCount').textContent = count;
+        }
+
+        // Efeito de hover nas perguntas
+        function setupHoverEffects() {
+            document.querySelectorAll('li').forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(5px)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
+        }
+
+        // Inicialização
+        function init() {
+            updateDate();
+            updateQuestionCount();
+            setupHoverEffects();
+            
+            // Atualiza o título do documento
+            document.title = document.getElementById('documentTitle').textContent;
+        }
+
+        // Executa quando o DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
