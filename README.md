@@ -17,3 +17,4 @@ Salva o PDF localmente e exibe o caminho do arquivo ao usuário.
 2. **Instale as dependências**:
    ```bash
    pip install requests
+binderlucas356@gmail.com_NynT0l2XTk63SvUrUUkl9ACgaHni4C4rczFVNWSnsUObBXNLSghhdKegpbbmiosr
